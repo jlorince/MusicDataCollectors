@@ -18,10 +18,8 @@ genres = soup.find_all("div",{'class':"genre scanme"})
 with codecs.open('eno_data.tsv','w','utf8') as outfile:
     for genre in genres:
 
-        # convert href="engenremap-acappella.html" --> "acappella"
         url = genre.find('a').get('href')
-        genre_name = genre.getText()[:-2]
-        #url[url.find('-')+1:][:-5]
+        genre_name = genre.getText()[:-2] # ignore the little ">>" link symbol
 
         # get full URL so we can download artist list for the genre
         full_url = "http://everynoise.com/"+url
@@ -43,6 +41,7 @@ with codecs.open('eno_data.tsv','w','utf8') as outfile:
             print output
             outfile.write('\t'.join(output)+'\n')
 
+# load our data into pandas, convert font sizes to weights, sort, and save final data
 data = pd.read_table('eno_data.tsv',header=None,names=['genre','artist','raw_weight'])
 data['weight'] = data.groupby('genre').apply(lambda grp: grp['raw_weight']/grp['raw_weight'].sum()).values
 data = data.drop('raw_weight',axis=1)
