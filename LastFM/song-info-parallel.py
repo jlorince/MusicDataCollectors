@@ -32,17 +32,17 @@ if os.path.exists(datadir+'artists'):
     for line in open(datadir+'artists','r'):
         artists_complete.add(int(line[:line.find('\t')]))
 
-names_albums = ['new_album_id','artist','album','mbid','release_data','tags','wiki']
-albums_complete = {}
-line = None
-if os.path.exists(datadir+'albums'):
-    for line in open(datadir+'albums','r'):
-        line.split('\t',3)[:3]
-        albums_complete['\t'.join([line[1:3]])] = int(line[0])
-if line:
-    album_id_idx = int(line[0])
-else:
-    album_id_idx = 0
+# names_albums = ['new_album_id','artist','album','mbid','release_data','tags','wiki']
+# albums_complete = {}
+# line = None
+# if os.path.exists(datadir+'albums'):
+#     for line in open(datadir+'albums','r'):
+#         line.split('\t',3)[:3]
+#         albums_complete['\t'.join([line[1:3]])] = int(line[0])
+# if line:
+#     album_id_idx = int(line[0])
+# else:
+#     album_id_idx = 0
 
 def WSError_check(command):
     try:
@@ -146,7 +146,7 @@ def process(row):
         #    album_id = -999
 
 
-        song_result = '\t'.join(map(lambda x: x if x else u'', [str(item_id), artist, song, str(album_id), trk_correction, str(trk_duration), trk_mbid, trk_tagdata, trk_wiki]))
+        song_result = '\t'.join(map(lambda x: x if x else u'', [str(item_id), artist, song, trk_correction, str(trk_duration), trk_mbid, trk_tagdata, trk_wiki]))
         return song_result,album_key
 
     elif item_type == 0:
