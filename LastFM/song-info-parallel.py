@@ -81,10 +81,10 @@ def write(queue, song_handle,artist_handle,album_handle):
             res = queue.get(timeout=2)
             if res is not None:
                 if len(res)==2:
-                    song_handle.write(res[0]+'\n')
-                    album_handle.write(res[1]+'\n')
+                    song_handle.write(res[0].encode('utf8')+'\n')
+                    album_handle.write(res[1].encode('utf8')+'\n')
                 else:
-                    artist_handle.write(res+'\n')
+                    artist_handle.write(res.encode('utf8')+'\n')
 
                 fhandle.flush()
         except:
@@ -180,7 +180,8 @@ if __name__ == '__main__':
     # [['item_id','item_type','artist','song']]
     item_list = list(zip(item_data['item_id'],item_data['item_type'],item_data['artist'],item_data['song']))
 
-    with codecs.open(datadir+'songs','a','utf-8') as songs, codecs.open(datadir+'artists','a','utf-8') as artists, codecs.open(datadir+'albums','a','utf-8') as albums:
+    #with codecs.open(datadir+'songs','a','utf-8') as songs, codecs.open(datadir+'artists','a','utf-8') as artists, codecs.open(datadir+'albums','a','utf-8') as albums:
+    with open(datadir+'songs','a') as songs, open(datadir+'artists','a') as artists, open(datadir+'albums','a') as albums:
 
 
         while True:
