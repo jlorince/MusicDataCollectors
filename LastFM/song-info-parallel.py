@@ -181,7 +181,7 @@ if __name__ == '__main__':
 
 
         while True:
-            clist = songlist[batch_start:batch_start+batch_size]
+            clist = item_list[batch_start:batch_start+batch_size]
             if len(clist) == 0:
                 break
             clist.append(None)
