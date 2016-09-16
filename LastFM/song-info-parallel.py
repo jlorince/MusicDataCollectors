@@ -187,32 +187,33 @@ if __name__ == '__main__':
 
 
         while True:
-            clist = item_list[batch_start:batch_start+batch_size]
-            if len(clist) == 0:
+            try:
+                clist = item_list[batch_start:batch_start+batch_size]
+                if len(clist) == 0:
+                    break
+                clist.append(None)
+
+                print("*** BATCH of %d AT %d" % (batch_size, batch_start))
+
+                workerQueue = Queue()
+                writerQueue = Queue()
+                feedProc = Process(target = feed , args = (workerQueue, clist))
+                calcProc = [Process(target = calc, args = (workerQueue, writerQueue)) for i in range(nthreads)]
+                writProc = Process(target = write, args = (writerQueue, songs,artists,albums))
+
+
+                feedProc.start()
+                for p in calcProc:
+                    p.start()
+                writProc.start()
+
+                feedProc.join()
+                for p in calcProc:
+                    p.join()
+
+                writProc.join()
+            except KeyboardInterrupt:
                 break
-            clist.append(None)
-
-            print("*** BATCH of %d AT %d" % (batch_size, batch_start))
-
-            workerQueue = Queue()
-            writerQueue = Queue()
-            feedProc = Process(target = feed , args = (workerQueue, clist))
-            calcProc = [Process(target = calc, args = (workerQueue, writerQueue)) for i in range(nthreads)]
-            writProc = Process(target = write, args = (writerQueue, songs,artists,albums))
-
-
-            feedProc.start()
-            for p in calcProc:
-                p.start()
-            writProc.start()
-
-            feedProc.join()
-            for p in calcProc:
-                p.join()
-
-            writProc.join()
-        except KeyboardInterrupt:
-            break
 
 
 
