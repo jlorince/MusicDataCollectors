@@ -7,7 +7,7 @@ from urllib import unquote_plus
 import multiprocessing
 from multiprocessing import Process, Queue
 import sys
-
+import time
 
 API_KEY,API_SECRET = open('lastfm.apikey').readlines()
 datadir = '/backup/home/jared/item_data/'
@@ -218,6 +218,7 @@ if __name__ == '__main__':
             writProc.join()
 
             batch_start += batch_size
+            sleep(10)
 
 
 
