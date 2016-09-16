@@ -169,7 +169,7 @@ def process(row):
         else:
             tagdata = None
 
-        artist_result = u'\t'.join(map(lambda x: x if x else u'', [str(row.item_id), row.artist, correction, mbid, tagdata, bio]))
+        artist_result = u'\t'.join(map(lambda x: x if x else u'', [str(item_id), artist, correction, mbid, tagdata, bio]))
         return artist_result
 
 if __name__ == '__main__':
