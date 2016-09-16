@@ -68,7 +68,6 @@ def calc(queueIn, queueOut):
             except:
                 print("process: %s / Exception raised:" , par, sys.exc_info())
                 res = None
-                break
 
             queueOut.put(res)
 
