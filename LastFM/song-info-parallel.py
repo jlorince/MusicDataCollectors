@@ -83,10 +83,12 @@ def write(queue, song_handle,artist_handle,album_handle):
                 if len(res)==2:
                     song_handle.write(res[0].encode('utf8')+'\n')
                     album_handle.write(res[1].encode('utf8')+'\n')
+                    song_handle.flush()
+                    album_handle.flush()
                 else:
                     artist_handle.write(res.encode('utf8')+'\n')
+                    artist_handle.flush()
 
-                fhandle.flush()
         except:
             print("write: Exception raised:" , sys.exc_info())
             break
@@ -209,6 +211,9 @@ if __name__ == '__main__':
                 p.join()
 
             writProc.join()
+        except KeyboardInterrupt:
+            break
+
 
 
 """
