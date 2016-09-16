@@ -149,7 +149,7 @@ def process(i,row):
     elif row.item_type == 0:
 
         if row.item_id in artists_complete:
-            continue
+            return None
 
         artist = network.get_artist(unquote_plus(row.artist))
         try:
