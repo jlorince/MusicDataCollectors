@@ -92,15 +92,16 @@ def write(queue, song_handle,artist_handle,album_handle):
 
 
 
-#, codecs.open(datadir+'tags','a') as tags:
-def process(i,row):
-    print i,row
-    if row.item_type==2:
+#item_list = list(zip(item_data['item_id'],item_data['item_type'],item_data['artist'],item_data['song']))
 
-        if row.item_id in songs_complete:
+def process(item_id,item_type,artist,song):
+
+    if item_type==2:
+
+        if item_id in songs_complete:
             return None
 
-        trk = network.get_track(artist=unquote_plus(row.artist),title=unquote_plus(row.song))
+        trk = network.get_track(artist=unquote_plus(artist),title=unquote_plus(song))
         album = WSError_check(trk.get_album)
         trk_correction = WSError_check(trk.get_correction)
         trk_duration = WSError_check(trk.get_duration)
@@ -144,15 +145,15 @@ def process(i,row):
         #    album_id = -999
 
 
-        song_result = '\t'.join(map(lambda x: x if x else u'', [str(row.item_id), row.artist, row.song, str(album_id), trk_correction, str(trk_duration), trk_mbid, trk_tagdata, trk_wiki]))
+        song_result = '\t'.join(map(lambda x: x if x else u'', [str(item_id), artist, song, str(album_id), trk_correction, str(trk_duration), trk_mbid, trk_tagdata, trk_wiki]))
         return song_result,album_key
 
-    elif row.item_type == 0:
+    elif item_type == 0:
 
-        if row.item_id in artists_complete:
+        if item_id in artists_complete:
             return None
 
-        artist = network.get_artist(unquote_plus(row.artist))
+        artist = network.get_artist(unquote_plus(artist))
         try:
             bio = artist.get_bio_content()
         except AttributeError:
@@ -175,7 +176,8 @@ if __name__ == '__main__':
     batch_size=1000
     batch_start=0
 
-    item_list = x=[(i,t) for i,t in enumerate(item_data.itertuples())]
+    # [['item_id','item_type','artist','song']]
+    item_list = list(zip(item_data['item_id'],item_data['item_type'],item_data['artist'],item_data['song']))
 
     with codecs.open(datadir+'songs','a','utf-8') as songs, codecs.open(datadir+'artists','a','utf-8') as artists, codecs.open(datadir+'albums','a','utf-8') as albums:
 
