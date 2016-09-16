@@ -6,6 +6,7 @@ import codecs
 from urllib import unquote_plus
 import multiprocessing
 from multiprocessing import Process, Queue
+import sys
 
 
 API_KEY,API_SECRET = open('lastfm.apikey').readlines()
@@ -16,7 +17,7 @@ network = pylast.LastFMNetwork(api_key=API_KEY, api_secret=API_SECRET)
 
 item_data = pd.read_table('P:/Projects/BigMusic/jared.rawdata/lastfm_itemlist.txt',header=None,names=['item_id','item_type','artist','artist_id','album','song','item_url','top_tag','total_scrobbles','unique_listeners'],nrows=10000)#.sort_values(by='total_scrobbles',ascending=False)
 
-#item_data = item_data[item_data['item_type']!=1][['item_id','item_type','artist','song']]
+item_data = item_data[item_data['item_type']!=1][['item_id','item_type','artist','song']]
 
 names_songs = ['item_id','artist','song','new_album_id','correction','duration','mbid','tags','wiki']
 songs_complete = set()
@@ -171,27 +172,39 @@ def process(i,row):
 
 if __name__ == '__main__':
     nthreads = 4
+    batch_size=1000
+    batch_start=0
+
+    item_list = x=[(i,t) for i,t in enumerate(item_data.itertuples())]
+
     with codecs.open(datadir+'songs','a','utf-8') as songs, codecs.open(datadir+'artists','a','utf-8') as artists, codecs.open(datadir+'albums','a','utf-8') as albums:
 
-        clist= enumerate(item_data.itertuples())
 
-        workerQueue = Queue()
-        writerQueue = Queue()
-        feedProc = Process(target = feed , args = (workerQueue, clist))
-        calcProc = [Process(target = calc, args = (workerQueue, writerQueue)) for i in range(nthreads)]
-        writProc = Process(target = write, args = (writerQueue, songs,artists,albums))
+        while True:
+            clist = songlist[batch_start:batch_start+batch_size]
+            if len(clist) == 0:
+                break
+            clist.append(None)
+
+            print("*** BATCH of %d AT %d" % (batch_size, batch_start))
+
+            workerQueue = Queue()
+            writerQueue = Queue()
+            feedProc = Process(target = feed , args = (workerQueue, clist))
+            calcProc = [Process(target = calc, args = (workerQueue, writerQueue)) for i in range(nthreads)]
+            writProc = Process(target = write, args = (writerQueue, songs,artists,albums))
 
 
-        feedProc.start()
-        for p in calcProc:
-            p.start()
-        writProc.start()
+            feedProc.start()
+            for p in calcProc:
+                p.start()
+            writProc.start()
 
-        feedProc.join()
-        for p in calcProc:
-            p.join()
+            feedProc.join()
+            for p in calcProc:
+                p.join()
 
-        writProc.join()
+            writProc.join()
 
 
 """
