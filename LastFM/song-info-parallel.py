@@ -218,7 +218,7 @@ if __name__ == '__main__':
             writProc.join()
 
             batch_start += batch_size
-            sleep(10)
+            time.sleep(10)
 
 
 
