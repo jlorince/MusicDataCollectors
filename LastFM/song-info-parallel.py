@@ -154,16 +154,16 @@ def process(row):
         if item_id in artists_complete:
             return None
 
-        artist = network.get_artist(unquote_plus(artist))
+        a = network.get_artist(unquote_plus(artist))
         try:
-            bio = artist.get_bio_content()
+            bio = a.get_bio_content()
         except AttributeError:
             bio = None
         if bio:
             bio = bio.replace('\n','\\n')
-        correction = artist.get_correction()
-        mbid = artist.get_mbid()
-        tags = artist.get_top_tags()
+        correction = a.get_correction()
+        mbid = a.get_mbid()
+        tags = a.get_top_tags()
         if tags:
             tagdata = u'|'.join([u"{}:{}".format(t.item.name,t.weight) for t in tags])
         else:
