@@ -11,7 +11,7 @@ import sys
 
 API_KEY,API_SECRET = open('lastfm.apikey').readlines()
 datadir = 'item_data/'
-itemlist_dir = 'lastfm_itemlist.txt'
+itemlist_dir = '/backup/home/jared/lastfm_itemlist.txt'
 #itemlist_dir = 'P:/Projects/BigMusic/jared.rawdata/lastfm_itemlist.txt'
 
 network = pylast.LastFMNetwork(api_key=API_KEY, api_secret=API_SECRET)
