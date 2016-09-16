@@ -64,7 +64,7 @@ def calc(queueIn, queueOut):
             try:
                 res = process(par)
             except:
-                print("grabSong: %s / Exception raised:" , par, sys.exc_info())
+                print("process: %s / Exception raised:" , par, sys.exc_info())
                 res = None
 
             queueOut.put(res)
@@ -97,7 +97,7 @@ def process(i,row):
     if row.item_type==2:
 
         if row.item_id in songs_complete:
-            continue
+            return None
 
         trk = network.get_track(artist=unquote_plus(row.artist),title=unquote_plus(row.song))
         album = WSError_check(trk.get_album)
