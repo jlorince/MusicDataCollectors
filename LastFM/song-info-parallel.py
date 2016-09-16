@@ -4,7 +4,8 @@ from urllib import quote_plus,unquote_plus
 import os
 import codecs
 from urllib import unquote_plus
-import multiprocessing as mp
+import multiprocessing
+from multiprocessing import Process, Queue
 
 
 API_KEY,API_SECRET = open('lastfm.apikey').readlines()
