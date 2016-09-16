@@ -16,7 +16,7 @@ itemlist_dir = '/backup/home/jared/lastfm_itemlist.txt'
 
 network = pylast.LastFMNetwork(api_key=API_KEY, api_secret=API_SECRET)
 
-item_data = pd.read_table(itemlist_dir,header=None,names=['item_id','item_type','artist','artist_id','album','song','item_url','top_tag','total_scrobbles','unique_listeners'],nrows=10000)#.sort_values(by='total_scrobbles',ascending=False)
+item_data = pd.read_table(itemlist_dir,header=None,names=['item_id','item_type','artist','artist_id','album','song','item_url','top_tag','total_scrobbles','unique_listeners'],nrows=None)#.sort_values(by='total_scrobbles',ascending=False)
 
 item_data = item_data[item_data['item_type']!=1][['item_id','item_type','artist','song']]
 
@@ -180,8 +180,8 @@ def process(row):
         return artist_result
 
 if __name__ == '__main__':
-    nthreads = 4
-    batch_size=1000
+    nthreads = 12
+    batch_size=10000
     batch_start=0
 
     # [['item_id','item_type','artist','song']]
@@ -192,35 +192,33 @@ if __name__ == '__main__':
 
 
         while True:
-            try:
-                clist = item_list[batch_start:batch_start+batch_size]
-                if len(clist) == 0:
-                    break
-                clist.append(None)
-
-                print("*** BATCH of %d AT %d" % (batch_size, batch_start))
-
-                workerQueue = Queue()
-                writerQueue = Queue()
-                feedProc = Process(target = feed , args = (workerQueue, clist))
-                calcProc = [Process(target = calc, args = (workerQueue, writerQueue)) for i in range(nthreads)]
-                writProc = Process(target = write, args = (writerQueue, songs,artists,albums))
-
-
-                feedProc.start()
-                for p in calcProc:
-                    p.start()
-                writProc.start()
-
-                feedProc.join()
-                for p in calcProc:
-                    p.join()
-
-                writProc.join()
-
-                batch_start += batch_size
-            except KeyboardInterrupt:
+            clist = item_list[batch_start:batch_start+batch_size]
+            if len(clist) == 0:
                 break
+            clist.append(None)
+
+            print("*** BATCH of %d AT %d" % (batch_size, batch_start))
+
+            workerQueue = Queue()
+            writerQueue = Queue()
+            feedProc = Process(target = feed , args = (workerQueue, clist))
+            calcProc = [Process(target = calc, args = (workerQueue, writerQueue)) for i in range(nthreads)]
+            writProc = Process(target = write, args = (writerQueue, songs,artists,albums))
+
+
+            feedProc.start()
+            for p in calcProc:
+                p.start()
+            writProc.start()
+
+            feedProc.join()
+            for p in calcProc:
+                p.join()
+
+            writProc.join()
+
+            batch_start += batch_size
+
 
 
 
