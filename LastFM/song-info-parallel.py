@@ -169,7 +169,7 @@ def process(i,row):
         artist_result = u'\t'.join(map(lambda x: x if x else u'', [str(row.item_id), row.artist, correction, mbid, tagdata, bio]))
         return artist_result
 
-if name == '__main__':
+if __name__ == '__main__':
     nthreads = 4
     with codecs.open(datadir+'songs','a','utf-8') as songs, codecs.open(datadir+'artists','a','utf-8') as artists, codecs.open(datadir+'albums','a','utf-8') as albums:
 
