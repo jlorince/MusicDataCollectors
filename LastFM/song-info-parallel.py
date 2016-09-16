@@ -94,8 +94,8 @@ def write(queue, song_handle,artist_handle,album_handle):
 
 #item_list = list(zip(item_data['item_id'],item_data['item_type'],item_data['artist'],item_data['song']))
 
-def process(item_id,item_type,artist,song):
-
+def process(row):
+    item_id,item_type,artist,song = row
     if item_type==2:
 
         if item_id in songs_complete:
