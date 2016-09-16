@@ -14,7 +14,7 @@ datadir = 'P:/Projects/BigMusic/jared.rawdata/item_data/'
 
 network = pylast.LastFMNetwork(api_key=API_KEY, api_secret=API_SECRET)
 
-#item_data = pd.read_table('P:/Projects/BigMusic/jared.rawdata/lastfm_itemlist.txt',header=None,names=['item_id','item_type','artist','artist_id','album','song','item_url','top_tag','total_scrobbles','unique_listeners'])#.sort_values(by='total_scrobbles',ascending=False)
+item_data = pd.read_table('P:/Projects/BigMusic/jared.rawdata/lastfm_itemlist.txt',header=None,names=['item_id','item_type','artist','artist_id','album','song','item_url','top_tag','total_scrobbles','unique_listeners'],nrows=10000)#.sort_values(by='total_scrobbles',ascending=False)
 
 #item_data = item_data[item_data['item_type']!=1][['item_id','item_type','artist','song']]
 
