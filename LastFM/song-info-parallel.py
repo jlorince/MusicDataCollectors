@@ -95,7 +95,7 @@ def write(queue, song_handle,artist_handle,album_handle):
         except:
             print("write: Exception raised:" , sys.exc_info())
             print res
-            print queue.qsize
+            print queue.qsize()
             break
 
 
