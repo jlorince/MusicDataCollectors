@@ -78,7 +78,7 @@ def calc(queueIn, queueOut):
 def write(queue, song_handle,artist_handle,album_handle):
     while True:
         try:
-            res = queue.get()
+            res = queue.get(timeout=2)
             if res is not None:
                 if len(res)==2:
                     if res[0]:
