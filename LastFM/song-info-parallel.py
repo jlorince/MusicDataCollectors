@@ -10,7 +10,7 @@ import sys
 
 
 API_KEY,API_SECRET = open('lastfm.apikey').readlines()
-datadir = 'item_data/'
+datadir = '/backup/home/jared/item_data/'
 itemlist_dir = '/backup/home/jared/lastfm_itemlist.txt'
 #itemlist_dir = 'P:/Projects/BigMusic/jared.rawdata/lastfm_itemlist.txt'
 
