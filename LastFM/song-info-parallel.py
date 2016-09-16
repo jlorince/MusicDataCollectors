@@ -78,7 +78,7 @@ def calc(queueIn, queueOut):
 def write(queue, song_handle,artist_handle,album_handle):
     while True:
         try:
-            res = queue.get(timeout=2)
+            res = queue.get()
             if res is not None:
                 if len(res)==2:
                     song_handle.write(res[0].encode('utf8')+'\n')
@@ -183,7 +183,7 @@ if __name__ == '__main__':
     item_list = list(zip(item_data['item_id'],item_data['item_type'],item_data['artist'],item_data['song']))
 
     #with codecs.open(datadir+'songs','a','utf-8') as songs, codecs.open(datadir+'artists','a','utf-8') as artists, codecs.open(datadir+'albums','a','utf-8') as albums:
-    with open(datadir+'songs','a') as songs, open(datadir+'artists','a') as artists, open(datadir+'albums','a') as albums:
+    with open(datadir+'songs','w') as songs, open(datadir+'artists','w') as artists, open(datadir+'albums','w') as albums:
 
 
         while True:
@@ -212,6 +212,8 @@ if __name__ == '__main__':
                     p.join()
 
                 writProc.join()
+
+                batch_start += batch_size
             except KeyboardInterrupt:
                 break
 
