@@ -197,7 +197,7 @@ if __name__ == '__main__':
 
             if len(clist) == 0:
                 break
-            clist.append(None)
+            #clist.append(None)
 
             logger.info("Batch started ({} rows starting at {})".format(batch_size,batch_start))
 
