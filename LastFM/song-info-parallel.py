@@ -208,7 +208,7 @@ if __name__ == '__main__':
             writerQueue = Queue()
             feedProc = Process(target = feed , args = (workerQueue, clist))
             calcProc = [Process(target = calc, args = (workerQueue, writerQueue)) for i in range(nthreads)]
-            writProc = Process(target = write, args = (writerQueue, songs,artists,albums))
+            writProc = Process(target = write, args = (writerQueue, songs,artists))
 
 
             feedProc.start()
