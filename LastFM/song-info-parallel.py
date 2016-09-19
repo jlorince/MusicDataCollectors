@@ -96,7 +96,7 @@ def write(queue, song_handle,artist_handle):
                     artist_handle.flush()
 
         except:
-            logger.info("write: Exception raised:" , sys.exc_info())
+            logger.info("write: Exception raised: {}".format(sys.exc_info()))
             break
 
 
