@@ -161,9 +161,11 @@ def process(row):
 
 
                 song_result = '\t'.join(map(lambda x: x if x else u'', [str(item_id), artist, song, trk_correction, str(trk_duration), trk_mbid, album_artist, album_title, trk_tagdata, trk_wiki]))
+                if attempts>0:
+                    logger.info('network error resolved ({},{})'.format(artist,song))
                 return 'song',song_result
             except pylast.NetworkError as e:
-                logging.info('network error ({},{}); will try {} more times'.format(artist,song,5-attempts))
+                logger.info('network error ({},{}); will try {} more times'.format(artist,song,5-attempts))
                 time.sleep(5+attempts)
                 attempts += 1
     raise(e)
