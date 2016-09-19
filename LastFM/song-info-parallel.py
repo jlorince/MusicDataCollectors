@@ -74,13 +74,13 @@ def calc(queueIn, queueOut):
             try:
                 res = process(par)
             except:
-                print("process: %s / Exception raised:" , par, sys.exc_info())
+                logger.info("process: %s / Exception raised:" , par, sys.exc_info())
                 res = None
 
             queueOut.put(res)
 
         except:
-            print("calc: Exception raised:" , sys.exc_info())
+            logger.info("calc: Exception raised:" , sys.exc_info())
             break
 
 def write(queue, song_handle,artist_handle):
@@ -97,8 +97,6 @@ def write(queue, song_handle,artist_handle):
 
         except:
             print("write: Exception raised:" , sys.exc_info())
-            print res
-            print queue.qsize()
             break
 
 
