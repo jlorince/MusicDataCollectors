@@ -164,10 +164,10 @@ def process(row):
                 if attempts>0:
                     logger.info('network error resolved ({},{})'.format(artist,song))
                 return 'song',song_result
-            except pylast.NetworkError as e:
-                logger.info('network error ({},{}); will try {} more times'.format(artist,song,5-attempts))
-                time.sleep(5+attempts)
-                attempts += 1
+        except pylast.NetworkError as e:
+            logger.info('network error ({},{}); will try {} more times'.format(artist,song,5-attempts))
+            time.sleep(5+attempts)
+            attempts += 1
     raise(e)
 
     elif item_type == 0:
