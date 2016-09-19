@@ -72,19 +72,20 @@ def calc(queueIn, queueOut):
                 queueIn.put(None)
                 break
             attempts = 0
-            while attempts <= 5:
-                try:
-                    res = process(par)
-                    break
-                except pylast.NetworkError as e:
-                    logger.info('network error ({}); will try {} more times'.format(par,5-attempts))
-                    time.sleep(3)
-                    attempts += 1
+            try:
+                while attempts <= 5:
+                    try:
+                        res = process(par)
+                        break
+                    except pylast.NetworkError as e:
+                        logger.info('network error ({}); will try {} more times'.format(par,5-attempts))
+                        time.sleep(3)
+                        attempts += 1
+                if attempts == 6:
+                    raise(e)
             except:
                 logger.info("process : Exception raised : {} ({})".format(par, sys.exc_info()))
                 res = None
-                break
-
 
             queueOut.put(res)
 
