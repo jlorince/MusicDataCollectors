@@ -75,6 +75,7 @@ def calc(queueIn, queueOut):
                 res = process(par)
             except pylast.NetworkError as e:
                 queueIn.put(par)
+                res = None
             except:
                 logger.info("process : Exception raised : {} ({})".format(par, sys.exc_info()))
                 res = None
