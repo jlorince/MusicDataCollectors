@@ -106,59 +106,66 @@ def write(queue, song_handle,artist_handle):
 def process(row):
     print row
     item_id,item_type,artist,song = row
-    if item_type==2:
+    attempts = 0
+    while attempts < 5:
+        try:
+            if item_type==2:
 
-        if item_id in songs_complete:
-            return None
+                if item_id in songs_complete:
+                    return None
 
-        trk = network.get_track(artist=unquote_plus(artist),title=unquote_plus(song))
-        album = WSError_check(trk.get_album)
-        trk_correction = WSError_check(trk.get_correction)
-        trk_duration = WSError_check(trk.get_duration)
-        #listener_count = trk.get_listener_count()
-        #playcount = trk.get_playcount()
-        trk_mbid = WSError_check(trk.get_mbid)
-        trk_wiki = WSError_check(trk.get_wiki_content)
-        if trk_wiki:
-            trk_wiki = trk_wiki.replace('\n','\\n')
-        trk_tags = WSError_check(trk.get_top_tags)
-        if trk_tags:
-            trk_tagdata = u'|'.join([u"{}:{}".format(t.item.name,t.weight) for t in trk_tags])
-        else:
-            trk_tagdata = None
+                trk = network.get_track(artist=unquote_plus(artist),title=unquote_plus(song))
+                album = WSError_check(trk.get_album)
+                trk_correction = WSError_check(trk.get_correction)
+                trk_duration = WSError_check(trk.get_duration)
+                #listener_count = trk.get_listener_count()
+                #playcount = trk.get_playcount()
+                trk_mbid = WSError_check(trk.get_mbid)
+                trk_wiki = WSError_check(trk.get_wiki_content)
+                if trk_wiki:
+                    trk_wiki = trk_wiki.replace('\n','\\n')
+                trk_tags = WSError_check(trk.get_top_tags)
+                if trk_tags:
+                    trk_tagdata = u'|'.join([u"{}:{}".format(t.item.name,t.weight) for t in trk_tags])
+                else:
+                    trk_tagdata = None
 
-        if album:
-            album_artist = album.artist.name
-            album_title = album.title
-            album_key = '\t'.join([album_artist,album_title])
+                if album:
+                    album_artist = album.artist.name
+                    album_title = album.title
+                    album_key = '\t'.join([album_artist,album_title])
 
-            # album_id = albums_complete.get(album_key)
-            # if not album_id:
-            #     album_mbid = album.get_mbid()
-            #     album_date = album.get_release_date()
-            #     album_tags = album.get_top_tags()
-            #     if album_tags:
-            #         album_tagdata = u'|'.join([u"{}:{}".format(t.item.name,t.weight) for t in album_tags])
-            #     else:
-            #         album_tagdata = None
-            #     album_wiki = album.get_wiki_content()
-            #     if album_wiki:
-            #         album_wiki = album_wiki.replace('\n','\\n')
-            #     album_id_idx += 1
-            #     album_id = album_id_idx
-            #     albums_complete[album_key] = album_id_idx
+                    # album_id = albums_complete.get(album_key)
+                    # if not album_id:
+                    #     album_mbid = album.get_mbid()
+                    #     album_date = album.get_release_date()
+                    #     album_tags = album.get_top_tags()
+                    #     if album_tags:
+                    #         album_tagdata = u'|'.join([u"{}:{}".format(t.item.name,t.weight) for t in album_tags])
+                    #     else:
+                    #         album_tagdata = None
+                    #     album_wiki = album.get_wiki_content()
+                    #     if album_wiki:
+                    #         album_wiki = album_wiki.replace('\n','\\n')
+                    #     album_id_idx += 1
+                    #     album_id = album_id_idx
+                    #     albums_complete[album_key] = album_id_idx
 
-            #     album_result = u'\t'.join(map(lambda x: x if x else u'', [str(album_id), album_artist, album_title, album_mbid, album_date, album_tagdata, album_wiki]))
-        else:
-            album_artist = None
-            album_title = None
-            album_key = None
-        #else:
-        #    album_id = -999
+                    #     album_result = u'\t'.join(map(lambda x: x if x else u'', [str(album_id), album_artist, album_title, album_mbid, album_date, album_tagdata, album_wiki]))
+                else:
+                    album_artist = None
+                    album_title = None
+                    album_key = None
+                #else:
+                #    album_id = -999
 
 
-        song_result = '\t'.join(map(lambda x: x if x else u'', [str(item_id), artist, song, trk_correction, str(trk_duration), trk_mbid, album_artist, album_title, trk_tagdata, trk_wiki]))
-        return 'song',song_result
+                song_result = '\t'.join(map(lambda x: x if x else u'', [str(item_id), artist, song, trk_correction, str(trk_duration), trk_mbid, album_artist, album_title, trk_tagdata, trk_wiki]))
+                return 'song',song_result
+            except pylast.NetworkError as e:
+                time.sleep(5+attempts)
+                attempts += 1
+    raise(e)
 
     elif item_type == 0:
 
