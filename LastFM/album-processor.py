@@ -27,3 +27,22 @@ else:
     album_id_idx = 0
 
 
+
+
+                    # album_id = albums_complete.get(album_key)
+                    # if not album_id:
+                    #     album_mbid = album.get_mbid()
+                    #     album_date = album.get_release_date()
+                    #     album_tags = album.get_top_tags()
+                    #     if album_tags:
+                    #         album_tagdata = u'|'.join([u"{}:{}".format(t.item.name,t.weight) for t in album_tags])
+                    #     else:
+                    #         album_tagdata = None
+                    #     album_wiki = album.get_wiki_content()
+                    #     if album_wiki:
+                    #         album_wiki = album_wiki.replace('\n','\\n')
+                    #     album_id_idx += 1
+                    #     album_id = album_id_idx
+                    #     albums_complete[album_key] = album_id_idx
+
+                    #     album_result = u'\t'.join(map(lambda x: x if x else u'', [str(album_id), album_artist, album_title, album_mbid, album_date, album_tagdata, album_wiki]))
