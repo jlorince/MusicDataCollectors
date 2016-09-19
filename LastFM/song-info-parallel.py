@@ -183,7 +183,7 @@ def process(row):
 
 if __name__ == '__main__':
     nthreads = 16
-    batch_size=10000
+    batch_size=1000
     batch_start=0
 
     # [['item_id','item_type','artist','song']]
