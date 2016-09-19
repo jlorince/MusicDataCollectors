@@ -9,6 +9,14 @@ from multiprocessing import Process, Queue
 import sys
 import time
 
+import logging
+logger = logging.getLogger('myapp')
+hdlr = logging.FileHandler(os.path.expanduser('~')+'/item_data/log')
+formatter = logging.Formatter('%(asctime)s %(message)s')
+hdlr.setFormatter(formatter)
+logger.addHandler(hdlr)
+logger.setLevel(logging.INFO)
+
 API_KEY,API_SECRET = open('lastfm.apikey').readlines()
 datadir = os.path.expanduser('~')+'/item_data/'
 itemlist_dir = os.path.expanduser('~')+'/lastfm_itemlist.txt'
@@ -202,7 +210,7 @@ if __name__ == '__main__':
                 break
             clist.append(None)
 
-            print("*** BATCH of %d AT %d" % (batch_size, batch_start))
+            logger.info("Batch started ({} rows starting at {})".format(batch_size,batch_start))
 
             workerQueue = Queue()
             writerQueue = Queue()
@@ -223,6 +231,7 @@ if __name__ == '__main__':
             writProc.join()
 
             batch_start += batch_size
+            logger.info("Batch COMPLETED ({} rows starting at {})".format(batch_size,batch_start))
             #time.sleep(10)
 
 
