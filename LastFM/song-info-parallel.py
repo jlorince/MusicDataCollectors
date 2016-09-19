@@ -73,6 +73,8 @@ def calc(queueIn, queueOut):
                 break
             try:
                 res = process(par)
+            except pylast.NetworkError as e:
+                queueIn.put(par)
             except:
                 logger.info("process : Exception raised : {} ({})".format(par, sys.exc_info()))
                 res = None
@@ -107,75 +109,77 @@ def process(row):
     print row
     item_id,item_type,artist,song = row
     attempts = 0
-    while attempts <= 5:
+    # while attempts <= 5:
+    #     try:
+    if item_type==2:
+        if item_id in songs_complete:
+            raise Exception('song already processed ({})'.format(artist,song))
+
+        trk = network.get_track(artist=unquote_plus(artist),title=unquote_plus(song))
+        album = WSError_check(trk.get_album)
+        trk_correction = WSError_check(trk.get_correction)
+        trk_duration = WSError_check(trk.get_duration)
+        #listener_count = trk.get_listener_count()
+        #playcount = trk.get_playcount()
+        trk_mbid = WSError_check(trk.get_mbid)
+        trk_wiki = WSError_check(trk.get_wiki_content)
+        if trk_wiki:
+            trk_wiki = trk_wiki.replace('\n','\\n')
+        trk_tags = WSError_check(trk.get_top_tags)
+        if trk_tags:
+            trk_tagdata = u'|'.join([u"{}:{}".format(t.item.name,t.weight) for t in trk_tags])
+        else:
+            trk_tagdata = None
+
+        if album:
+            album_artist = album.artist.name
+            album_title = album.title
+            album_key = '\t'.join([album_artist,album_title])
+
+        else:
+            album_artist = None
+            album_title = None
+            album_key = None
+
+
+        result = '\t'.join(map(lambda x: x if x else u'', [str(item_id), artist, song, trk_correction, str(trk_duration), trk_mbid, album_artist, album_title, trk_tagdata, trk_wiki]))
+
+        return_type = 'song'
+
+    elif item_type == 0:
+
+        if item_id in artists_complete:
+            raise Exception('artists already processed ({})'.format(artist))
+
+        a = network.get_artist(unquote_plus(artist))
         try:
-            if item_type==2:
-                if item_id in songs_complete:
-                    raise Exception('song already processed ({})'.format(artist,song))
+            bio = a.get_bio_content()
+        except AttributeError:
+            bio = None
+        if bio:
+            bio = bio.replace('\n','\\n')
+        correction = a.get_correction()
+        mbid = a.get_mbid()
+        tags = a.get_top_tags()
+        if tags:
+            tagdata = u'|'.join([u"{}:{}".format(t.item.name,t.weight) for t in tags])
+        else:
+            tagdata = None
 
-                trk = network.get_track(artist=unquote_plus(artist),title=unquote_plus(song))
-                album = WSError_check(trk.get_album)
-                trk_correction = WSError_check(trk.get_correction)
-                trk_duration = WSError_check(trk.get_duration)
-                #listener_count = trk.get_listener_count()
-                #playcount = trk.get_playcount()
-                trk_mbid = WSError_check(trk.get_mbid)
-                trk_wiki = WSError_check(trk.get_wiki_content)
-                if trk_wiki:
-                    trk_wiki = trk_wiki.replace('\n','\\n')
-                trk_tags = WSError_check(trk.get_top_tags)
-                if trk_tags:
-                    trk_tagdata = u'|'.join([u"{}:{}".format(t.item.name,t.weight) for t in trk_tags])
-                else:
-                    trk_tagdata = None
+        result = u'\t'.join(map(lambda x: x if x else u'', [str(item_id), artist, correction, mbid, tagdata, bio]))
+        return_type =  'artist'
 
-                if album:
-                    album_artist = album.artist.name
-                    album_title = album.title
-                    album_key = '\t'.join([album_artist,album_title])
+    if attempts>0:
+        logger.info('network error resolved after {} extra attempts ({},{})'.format(attempts, artist,song))
 
-                else:
-                    album_artist = None
-                    album_title = None
-                    album_key = None
+    return return_type,result
 
-
-                result = '\t'.join(map(lambda x: x if x else u'', [str(item_id), artist, song, trk_correction, str(trk_duration), trk_mbid, album_artist, album_title, trk_tagdata, trk_wiki]))
-
-                return_type = 'song'
-
-            elif item_type == 0:
-
-                if item_id in artists_complete:
-                    raise Exception('artists already processed ({})'.format(artist))
-
-                a = network.get_artist(unquote_plus(artist))
-                try:
-                    bio = a.get_bio_content()
-                except AttributeError:
-                    bio = None
-                if bio:
-                    bio = bio.replace('\n','\\n')
-                correction = a.get_correction()
-                mbid = a.get_mbid()
-                tags = a.get_top_tags()
-                if tags:
-                    tagdata = u'|'.join([u"{}:{}".format(t.item.name,t.weight) for t in tags])
-                else:
-                    tagdata = None
-
-                result = u'\t'.join(map(lambda x: x if x else u'', [str(item_id), artist, correction, mbid, tagdata, bio]))
-                return_type =  'artist'
-            if attempts>0:
-                logger.info('network error resolved after {} extra attempts ({},{})'.format(attempts, artist,song))
-            return return_type,result
-
-        except pylast.NetworkError as e:
-            logger.info('network error ({},{}); will try {} more times'.format(artist,song,5-attempts))
-            #time.sleep(5+attempts)
-            for _ in xrange(1000000000): pass
-            attempts += 1
-    raise(e)
+    #     except pylast.NetworkError as e:
+    #         logger.info('network error ({},{}); will try {} more times'.format(artist,song,5-attempts))
+    #         #time.sleep(5+attempts)
+    #         for _ in xrange(1000000000): pass
+    #         attempts += 1
+    # raise(e)
 
 if __name__ == '__main__':
     nthreads = 16
@@ -225,7 +229,7 @@ if __name__ == '__main__':
 
             logger.info("Batch COMPLETED ({} rows starting at {})".format(batch_size,batch_start))
             batch_start += batch_size
-            #time.sleep(10)
+            time.sleep(10)
 
 
 
