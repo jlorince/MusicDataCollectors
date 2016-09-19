@@ -107,7 +107,7 @@ def process(row):
     print row
     item_id,item_type,artist,song = row
     attempts = 0
-    while attempts < 5:
+    while attempts <= 5:
         try:
             if item_type==2:
 
@@ -163,6 +163,7 @@ def process(row):
                 song_result = '\t'.join(map(lambda x: x if x else u'', [str(item_id), artist, song, trk_correction, str(trk_duration), trk_mbid, album_artist, album_title, trk_tagdata, trk_wiki]))
                 return 'song',song_result
             except pylast.NetworkError as e:
+                logging.info('network error ({},{}); will try {} more times'.format(artist,song,5-attempts))
                 time.sleep(5+attempts)
                 attempts += 1
     raise(e)
