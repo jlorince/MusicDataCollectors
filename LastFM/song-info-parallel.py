@@ -140,10 +140,9 @@ def process(row):
                     album_key = None
 
 
-                song_result = '\t'.join(map(lambda x: x if x else u'', [str(item_id), artist, song, trk_correction, str(trk_duration), trk_mbid, album_artist, album_title, trk_tagdata, trk_wiki]))
-                if attempts>0:
-                    logger.info('network error resolved after {} extra attempts ({},{})'.format(attempts, artist,song))
-                return 'song',song_result
+                result = '\t'.join(map(lambda x: x if x else u'', [str(item_id), artist, song, trk_correction, str(trk_duration), trk_mbid, album_artist, album_title, trk_tagdata, trk_wiki]))
+
+                return_type = 'song'
 
             elif item_type == 0:
 
@@ -165,8 +164,11 @@ def process(row):
                 else:
                     tagdata = None
 
-                artist_result = u'\t'.join(map(lambda x: x if x else u'', [str(item_id), artist, correction, mbid, tagdata, bio]))
-                return 'artist', artist_result
+                result = u'\t'.join(map(lambda x: x if x else u'', [str(item_id), artist, correction, mbid, tagdata, bio]))
+                return_type =  'artist'
+            if attempts>0:
+                logger.info('network error resolved after {} extra attempts ({},{})'.format(attempts, artist,song))
+            return return_type,result
 
         except pylast.NetworkError as e:
             logger.info('network error ({},{}); will try {} more times'.format(artist,song,5-attempts))
@@ -176,7 +178,7 @@ def process(row):
 
 if __name__ == '__main__':
     nthreads = 16
-    batch_size=100000
+    batch_size=10000
     batch_start=0
 
     # [['item_id','item_type','artist','song']]
@@ -197,7 +199,8 @@ if __name__ == '__main__':
 
             if len(clist) == 0:
                 break
-            #clist.append(None)
+
+            clist.append(None)
 
             logger.info("Batch started ({} rows starting at {})".format(batch_size,batch_start))
 
