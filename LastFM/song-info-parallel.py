@@ -18,7 +18,7 @@ network = pylast.LastFMNetwork(api_key=API_KEY, api_secret=API_SECRET)
 
 #item_data = pd.read_table(itemlist_dir,header=None,names=['item_id','item_type','artist','artist_id','album','song','item_url','top_tag','total_scrobbles','unique_listeners'],nrows=None)#.sort_values(by='total_scrobbles',ascending=False)
 
-item_data = item_data[item_data['item_type']!=1][['item_id','item_type','artist','song']]
+#item_data = item_data[item_data['item_type']!=1][['item_id','item_type','artist','song']]
 
 names_songs = ['item_id','artist','song','new_album_id','correction','duration','mbid','tags','wiki']
 songs_complete = set()
