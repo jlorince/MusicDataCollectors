@@ -10,13 +10,13 @@ import sys
 import time
 
 API_KEY,API_SECRET = open('lastfm.apikey').readlines()
-datadir = '/backup/home/jared/item_data/'
-itemlist_dir = '/backup/home/jared/lastfm_itemlist.txt'
+datadir = os.path.expanduser('~')+'/item_data/'
+itemlist_dir = os.path.expanduser('~')+'/lastfm_itemlist.txt'
 #itemlist_dir = 'P:/Projects/BigMusic/jared.rawdata/lastfm_itemlist.txt'
 
 network = pylast.LastFMNetwork(api_key=API_KEY, api_secret=API_SECRET)
 
-item_data = pd.read_table(itemlist_dir,header=None,names=['item_id','item_type','artist','artist_id','album','song','item_url','top_tag','total_scrobbles','unique_listeners'],nrows=None)#.sort_values(by='total_scrobbles',ascending=False)
+#item_data = pd.read_table(itemlist_dir,header=None,names=['item_id','item_type','artist','artist_id','album','song','item_url','top_tag','total_scrobbles','unique_listeners'],nrows=None)#.sort_values(by='total_scrobbles',ascending=False)
 
 item_data = item_data[item_data['item_type']!=1][['item_id','item_type','artist','song']]
 
@@ -75,20 +75,16 @@ def calc(queueIn, queueOut):
             print("calc: Exception raised:" , sys.exc_info())
             break
 
-def write(queue, song_handle,artist_handle,album_handle):
+def write(queue, song_handle,artist_handle):
     while True:
         try:
             res = queue.get(timeout=2)
             if res is not None:
-                if len(res)==2:
-                    if res[0]:
-                        song_handle.write(res[0].encode('utf8')+'\n')
-                    if res[1]:
-                        album_handle.write(res[1].encode('utf8')+'\n')
+                if res[0] == 'song':
+                    song_handle.write(res[1].encode('utf8')+'\n')
                     song_handle.flush()
-                    album_handle.flush()
-                else:
-                    artist_handle.write(res.encode('utf8')+'\n')
+                elif res[0] == 'artist':
+                    artist_handle.write(res[1].encode('utf8')+'\n')
                     artist_handle.flush()
 
         except:
@@ -148,13 +144,15 @@ def process(row):
 
             #     album_result = u'\t'.join(map(lambda x: x if x else u'', [str(album_id), album_artist, album_title, album_mbid, album_date, album_tagdata, album_wiki]))
         else:
+            album_artist = None
+            album_title = None
             album_key = None
         #else:
         #    album_id = -999
 
 
-        song_result = '\t'.join(map(lambda x: x if x else u'', [str(item_id), artist, song, trk_correction, str(trk_duration), trk_mbid, trk_tagdata, trk_wiki]))
-        return song_result,album_key
+        song_result = '\t'.join(map(lambda x: x if x else u'', [str(item_id), artist, song, trk_correction, str(trk_duration), trk_mbid, album_artist, album_title, trk_tagdata, trk_wiki]))
+        return 'song',song_result
 
     elif item_type == 0:
 
@@ -177,22 +175,29 @@ def process(row):
             tagdata = None
 
         artist_result = u'\t'.join(map(lambda x: x if x else u'', [str(item_id), artist, correction, mbid, tagdata, bio]))
-        return artist_result
+        return 'artist', artist_result
 
 if __name__ == '__main__':
-    nthreads = 12
-    batch_size=10000
+    nthreads = 16
+    batch_size=100000
     batch_start=0
 
     # [['item_id','item_type','artist','song']]
-    item_list = list(zip(item_data['item_id'],item_data['item_type'],item_data['artist'],item_data['song']))
+    #item_list = list(zip(item_data['item_id'],item_data['item_type'],item_data['artist'],item_data['song']))
 
     #with codecs.open(datadir+'songs','a','utf-8') as songs, codecs.open(datadir+'artists','a','utf-8') as artists, codecs.open(datadir+'albums','a','utf-8') as albums:
-    with open(datadir+'songs','a') as songs, open(datadir+'artists','a') as artists, open(datadir+'albums','a') as albums:
-
+    with open(datadir+'songs','a') as songs, open(datadir+'artists','a') as artists:
+        #, open(datadir+'albums','a') as albums:
 
         while True:
-            clist = item_list[batch_start:batch_start+batch_size]
+            #clist = item_list[batch_start:batch_start+batch_size]
+            item_data = pd.read_table(itemlist_dir,header=None,names=['item_id','item_type','artist','artist_id','album','song','item_url','top_tag','total_scrobbles','unique_listeners'],nrows=batch_size,skiprows=batch_start)
+
+            item_data = item_data[item_data['item_type']!=1][['item_id','item_type','artist','song']]
+
+            clist = list(zip(item_data['item_id'],item_data['item_type'],item_data['artist'],item_data['song']))
+
+
             if len(clist) == 0:
                 break
             clist.append(None)
@@ -218,7 +223,7 @@ if __name__ == '__main__':
             writProc.join()
 
             batch_start += batch_size
-            time.sleep(10)
+            #time.sleep(10)
 
 
 
