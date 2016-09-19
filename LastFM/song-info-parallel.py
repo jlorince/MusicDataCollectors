@@ -110,7 +110,6 @@ def process(row):
     while attempts <= 5:
         try:
             if item_type==2:
-
                 if item_id in songs_complete:
                     return None
 
@@ -164,34 +163,35 @@ def process(row):
                 if attempts>0:
                     logger.info('network error resolved ({},{})'.format(artist,song))
                 return 'song',song_result
+
+            elif item_type == 0:
+
+                if item_id in artists_complete:
+                    return None
+
+                a = network.get_artist(unquote_plus(artist))
+                try:
+                    bio = a.get_bio_content()
+                except AttributeError:
+                    bio = None
+                if bio:
+                    bio = bio.replace('\n','\\n')
+                correction = a.get_correction()
+                mbid = a.get_mbid()
+                tags = a.get_top_tags()
+                if tags:
+                    tagdata = u'|'.join([u"{}:{}".format(t.item.name,t.weight) for t in tags])
+                else:
+                    tagdata = None
+
+                artist_result = u'\t'.join(map(lambda x: x if x else u'', [str(item_id), artist, correction, mbid, tagdata, bio]))
+                return 'artist', artist_result
+
         except pylast.NetworkError as e:
             logger.info('network error ({},{}); will try {} more times'.format(artist,song,5-attempts))
             time.sleep(5+attempts)
             attempts += 1
     raise(e)
-
-    elif item_type == 0:
-
-        if item_id in artists_complete:
-            return None
-
-        a = network.get_artist(unquote_plus(artist))
-        try:
-            bio = a.get_bio_content()
-        except AttributeError:
-            bio = None
-        if bio:
-            bio = bio.replace('\n','\\n')
-        correction = a.get_correction()
-        mbid = a.get_mbid()
-        tags = a.get_top_tags()
-        if tags:
-            tagdata = u'|'.join([u"{}:{}".format(t.item.name,t.weight) for t in tags])
-        else:
-            tagdata = None
-
-        artist_result = u'\t'.join(map(lambda x: x if x else u'', [str(item_id), artist, correction, mbid, tagdata, bio]))
-        return 'artist', artist_result
 
 if __name__ == '__main__':
     nthreads = 16
