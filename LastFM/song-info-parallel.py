@@ -28,7 +28,7 @@ network = pylast.LastFMNetwork(api_key=API_KEY, api_secret=API_SECRET)
 
 #item_data = item_data[item_data['item_type']!=1][['item_id','item_type','artist','song']]
 
-names_songs = ['item_id','artist','song','new_album_id','correction','duration','mbid','tags','wiki']
+names_songs = ['item_id','artist','song','correction','duration','mbid','album_artist','album_name','tags','wiki']
 songs_complete = set()
 if os.path.exists(datadir+'songs'):
     for line in open(datadir+'songs','r'):
@@ -89,7 +89,7 @@ def calc(queueIn, queueOut):
 def write(queue, song_handle,artist_handle):
     while True:
         try:
-            res = queue.get(timeout=2)
+            res = queue.get(timeout=10)
             if res is not None:
                 if res[0] == 'song':
                     song_handle.write(res[1].encode('utf8')+'\n')
@@ -183,9 +183,9 @@ def process(row):
     # raise(e)
 
 if __name__ == '__main__':
-    nthreads = 16
-    batch_size=1000
-    batch_start=0
+    nthreads = 24
+    batch_size=10000
+    batch_start=6760000
 
     # [['item_id','item_type','artist','song']]
     #item_list = list(zip(item_data['item_id'],item_data['item_type'],item_data['artist'],item_data['song']))
@@ -224,9 +224,17 @@ if __name__ == '__main__':
 
             feedProc.join()
             for p in calcProc:
-                p.join()
+                p.join(timeout=30)
 
-            writProc.join()
+            writProc.join(timeout=30)
+
+            feedProc.terminate()
+            writProc.terminate()
+            for p in calcProc:
+                p.terminate()
+
+            workerQueue.close()
+            writerQueue.close()
 
             logger.info("Batch COMPLETED ({} rows starting at {})".format(batch_size,batch_start))
             batch_start += batch_size
