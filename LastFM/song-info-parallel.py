@@ -222,7 +222,7 @@ if __name__ == '__main__':
                 p.start()
             writProc.start()
 
-            feedProc.join()
+            feedProc.join(timeout=30)
             for p in calcProc:
                 p.join(timeout=30)
 
